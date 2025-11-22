@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Medicine name" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_strength"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Strength" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_dose_amount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Dosage amount" />
+
+        <Spinner
+            android:id="@+id/sp_schedule_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_interval_hours"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Every X hours (for interval)" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_weekdays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Weekdays (e.g. MON,WED,FRI)" />
+
+        <TextView
+            android:id="@+id/tv_times"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Time" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_start_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Start date (yyyy-MM-dd)" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_end_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="End date (yyyy-MM-dd)" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_instructions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Special instructions" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_refills"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Number of refills" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_initial_supply"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Initial supply count" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🖼️ Choose Photo"
+            app:cornerRadius="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="💾 Save"
+            app:cornerRadius="20dp" />
+
+    </LinearLayout>
+
+</ScrollView>

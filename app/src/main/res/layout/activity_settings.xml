@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView android:id="@+id/desc_notifications" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_notifications" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="🔔 Enable Notifications" app:cornerRadius="20dp" />
+
+        <TextView android:id="@+id/desc_location" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_location" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="📍 Allow Location" app:cornerRadius="20dp" />
+
+        <TextView android:id="@+id/desc_camera" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_photos" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="🖼️ Allow Photos" app:cornerRadius="20dp" />
+
+        <TextView android:id="@+id/desc_caretaker" android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+</ScrollView>
