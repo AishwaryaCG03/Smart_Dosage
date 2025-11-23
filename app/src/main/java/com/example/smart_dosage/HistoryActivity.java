@@ -31,6 +31,7 @@ public class HistoryActivity extends AppCompatActivity {
     private CalendarAdapter calendarAdapter;
     private java.util.Date selectedDay;
     private final Map<Long, String> medNameCache = new HashMap<>();
+    private Calendar viewMonthCal = Calendar.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,14 +47,52 @@ public class HistoryActivity extends AppCompatActivity {
         rvCalendar.setLayoutManager(new GridLayoutManager(this, 7));
         calendarAdapter = new CalendarAdapter(new ArrayList<>(), day -> {
             selectedDay = day;
-            loadTimelineForDay(day);
+            showDayActions(day);
         });
         rvCalendar.setAdapter(calendarAdapter);
 
+        viewMonthCal.set(Calendar.DAY_OF_MONTH, 1);
         loadStats(tvMetrics, tvStreak);
         findViewById(R.id.btn_day).setOnClickListener(v -> loadStats(tvMetrics, tvStreak));
         findViewById(R.id.btn_week).setOnClickListener(v -> loadStats(tvMetrics, tvStreak));
         findViewById(R.id.btn_month).setOnClickListener(v -> loadStats(tvMetrics, tvStreak));
+
+        View prev = findViewById(R.id.btn_prev_month);
+        View next = findViewById(R.id.btn_next_month);
+        TextView tvTitle = findViewById(R.id.tv_month_title);
+        if (tvTitle != null) tvTitle.setText(new java.text.SimpleDateFormat("MMMM yyyy").format(viewMonthCal.getTime()));
+        if (prev != null) prev.setOnClickListener(v -> { viewMonthCal.add(Calendar.MONTH, -1); if (tvTitle != null) tvTitle.setText(new java.text.SimpleDateFormat("MMMM yyyy").format(viewMonthCal.getTime())); loadStats(tvMetrics, tvStreak); });
+        if (next != null) next.setOnClickListener(v -> { viewMonthCal.add(Calendar.MONTH, 1); if (tvTitle != null) tvTitle.setText(new java.text.SimpleDateFormat("MMMM yyyy").format(viewMonthCal.getTime())); loadStats(tvMetrics, tvStreak); });
+    }
+
+    private void showDayActions(java.util.Date day){
+        String[] options = new String[]{"Taken","Snoozed","Missed"};
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(new SimpleDateFormat("EEE, MMM d").format(day))
+                .setItems(options, (d,w) -> {
+                    String act = w==0?"TAKEN":(w==1?"SNOOZE":"MISSED");
+                    markDayStatus(day, act);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void markDayStatus(java.util.Date day, String action){
+        new Thread(() -> {
+            Calendar c = Calendar.getInstance(); c.setTime(day); c.set(Calendar.HOUR_OF_DAY, 12); c.set(Calendar.MINUTE, 0); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0);
+            com.example.smart_dosage.data.DoseEvent e = new com.example.smart_dosage.data.DoseEvent();
+            e.medicineId = -1; // manual mark
+            e.scheduledTime = c.getTime();
+            e.action = action;
+            e.actionTime = new java.util.Date();
+            AppDatabase.get(this).doseEventDao().insert(e);
+            runOnUiThread(() -> {
+                loadTimelineForDay(day);
+                TextView tvMetrics = findViewById(R.id.tv_metrics);
+                TextView tvStreak = findViewById(R.id.tv_streak);
+                loadStats(tvMetrics, tvStreak);
+            });
+        }).start();
     }
 
     private void loadStats(TextView tvMetrics, TextView tvStreak) {
@@ -63,11 +102,12 @@ public class HistoryActivity extends AppCompatActivity {
             java.util.Date weekStart, monthStart, monthEnd;
             cal.add(Calendar.DAY_OF_YEAR, -6);
             weekStart = cal.getTime();
-            cal = Calendar.getInstance();
-            cal.set(Calendar.DAY_OF_MONTH, 1); cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0);
-            monthStart = cal.getTime();
-            cal.add(Calendar.MONTH, 1); cal.add(Calendar.MILLISECOND, -1);
-            monthEnd = cal.getTime();
+            Calendar calMonth = (Calendar) viewMonthCal.clone();
+            calMonth.set(Calendar.HOUR_OF_DAY, 0); calMonth.set(Calendar.MINUTE, 0); calMonth.set(Calendar.SECOND, 0); calMonth.set(Calendar.MILLISECOND, 0);
+            monthStart = calMonth.getTime();
+            Calendar calMonthEnd = (Calendar) calMonth.clone();
+            calMonthEnd.add(Calendar.MONTH, 1); calMonthEnd.add(Calendar.MILLISECOND, -1);
+            monthEnd = calMonthEnd.getTime();
 
             int takenWeek = AppDatabase.get(this).doseEventDao().countTaken(weekStart, today);
             int scheduledWeek = AppDatabase.get(this).doseEventDao().countScheduled(weekStart, today);
@@ -78,31 +118,61 @@ public class HistoryActivity extends AppCompatActivity {
             int monthPct = scheduledMonth == 0 ? 0 : (int) Math.round((takenMonth * 100.0) / scheduledMonth);
 
             List<DoseEvent> monthEvents = AppDatabase.get(this).doseEventDao().historyAllList(monthStart, monthEnd);
-            Map<String, int[]> dayCounts = new HashMap<>(); // key=yyyy-MM-dd, [scheduled, taken]
+            Map<String, DayStats> dayStatsMonth = new HashMap<>(); // key=yyyy-MM-dd
             SimpleDateFormat dayFmt = new SimpleDateFormat("yyyy-MM-dd");
             if (monthEvents != null) {
                 for (DoseEvent e : monthEvents) {
                     String key = dayFmt.format(e.scheduledTime != null ? e.scheduledTime : e.actionTime);
-                    int[] arr = dayCounts.getOrDefault(key, new int[]{0,0});
-                    arr[0] += 1; // scheduled
-                    if ("TAKEN".equalsIgnoreCase(e.action)) arr[1] += 1;
-                    dayCounts.put(key, arr);
+                    DayStats stats = dayStatsMonth.getOrDefault(key, new DayStats());
+                    if ("SCHEDULED".equalsIgnoreCase(e.action)) stats.scheduled += 1;
+                    else if ("TAKEN".equalsIgnoreCase(e.action)) stats.taken += 1;
+                    else if ("SNOOZE".equalsIgnoreCase(e.action) || "SNOOZED".equalsIgnoreCase(e.action)) stats.snoozed = true;
+                    else if ("MISSED".equalsIgnoreCase(e.action)) stats.missed = true;
+                    dayStatsMonth.put(key, stats);
                 }
             }
 
-            int streak = 0; // consecutive fully taken days
+            Calendar rangeCal = Calendar.getInstance();
+            rangeCal.add(Calendar.DAY_OF_YEAR, -365);
+            java.util.Date rangeStart = rangeCal.getTime();
+            List<DoseEvent> allEvents = AppDatabase.get(this).doseEventDao().historyAllList(rangeStart, today);
+            Map<String, DayStats> dayStatsAll = new HashMap<>();
+            if (allEvents != null) {
+                for (DoseEvent e : allEvents) {
+                    String key = dayFmt.format(e.scheduledTime != null ? e.scheduledTime : e.actionTime);
+                    DayStats stats = dayStatsAll.getOrDefault(key, new DayStats());
+                    if ("SCHEDULED".equalsIgnoreCase(e.action)) stats.scheduled += 1;
+                    else if ("TAKEN".equalsIgnoreCase(e.action)) stats.taken += 1;
+                    else if ("SNOOZE".equalsIgnoreCase(e.action) || "SNOOZED".equalsIgnoreCase(e.action)) stats.snoozed = true;
+                    else if ("MISSED".equalsIgnoreCase(e.action)) stats.missed = true;
+                    dayStatsAll.put(key, stats);
+                }
+            }
+
+            int streak = 0; // consecutive green days across months
             Calendar scan = Calendar.getInstance();
-            for (int i=0;i<30;i++){
+            for (int i=0;i<365;i++){
                 String k = dayFmt.format(scan.getTime());
-                int[] arr = dayCounts.get(k);
-                if (arr != null && arr[0] > 0 && arr[1] == arr[0]) streak++; else break;
+                DayStats s = dayStatsAll.get(k);
+                int status = computeStatus(s);
+                if (status == 3) streak++; else break;
                 scan.add(Calendar.DAY_OF_YEAR, -1);
             }
 
-            List<DayCell> monthCells = buildMonthCells(dayCounts);
+            List<DayCell> monthCells = buildMonthCells(dayStatsMonth, viewMonthCal);
             final int finalWeekPct = weekPct;
             final int finalMonthPct = monthPct;
-            final int finalStreak = streak;
+            int totalGreen = 0;
+            Calendar countCal = Calendar.getInstance();
+            countCal.setTime(today);
+            Calendar begin = Calendar.getInstance(); begin.add(Calendar.DAY_OF_YEAR, -365);
+            while (!countCal.before(begin)) {
+                String k = dayFmt.format(countCal.getTime());
+                DayStats s = dayStatsAll.get(k);
+                if (computeStatus(s) == 3) totalGreen++;
+                countCal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            final int finalStreak = totalGreen;
             runOnUiThread(() -> {
                 ((android.widget.ProgressBar)findViewById(R.id.pb_week)).setProgress(finalWeekPct);
                 tvMetrics.setText("Weekly adherence: " + finalWeekPct + "% • Monthly: " + finalMonthPct + "%");
@@ -122,9 +192,9 @@ public class HistoryActivity extends AppCompatActivity {
         }).start();
     }
 
-    private List<DayCell> buildMonthCells(Map<String,int[]> dayCounts){
+    private List<DayCell> buildMonthCells(Map<String,DayStats> dayStats, Calendar base){
         List<DayCell> cells = new ArrayList<>();
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = (Calendar) base.clone();
         cal.set(Calendar.DAY_OF_MONTH,1); cal.set(Calendar.HOUR_OF_DAY,0); cal.set(Calendar.MINUTE,0); cal.set(Calendar.SECOND,0); cal.set(Calendar.MILLISECOND,0);
         int firstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK); // 1=Sunday
         int offset = (firstDayOfWeek + 6) % 7; // make Monday=0
@@ -134,14 +204,21 @@ public class HistoryActivity extends AppCompatActivity {
         for (int d=1; d<=daysInMonth; d++){
             cal.set(Calendar.DAY_OF_MONTH,d);
             String k = fmt.format(cal.getTime());
-            int[] arr = dayCounts.get(k);
-            int status = 0; // 0=none,1=missed,2=partial,3=full
-            if (arr != null && arr[0]>0){
-                if (arr[1]==0) status=1; else if (arr[1]<arr[0]) status=2; else status=3;
-            }
+            DayStats s = dayStats.get(k);
+            int status = computeStatus(s);
             cells.add(new DayCell(cal.getTime(), status));
         }
         return cells;
+    }
+
+    private int computeStatus(DayStats s){
+        if (s == null) return 0;
+        // 0=none,1=missed(red),2=partial/snoozed(yellow),3=full(green)
+        if (s.taken > 0 && (s.scheduled == 0 || s.taken >= s.scheduled)) return 3;
+        if (s.snoozed) return 2;
+        if (s.missed || (s.scheduled > 0 && s.taken == 0)) return 1;
+        if (s.taken > 0 && s.taken < s.scheduled) return 2;
+        return 0;
     }
 
     private void loadTimelineForDay(java.util.Date day){
@@ -156,7 +233,8 @@ public class HistoryActivity extends AppCompatActivity {
                     Map<String,String> m = new HashMap<>();
                     String act = e.action;
                     String medName = getMedName(e.medicineId);
-                    String title = sdf.format(e.scheduledTime==null?e.actionTime:e.scheduledTime) + " — " + (medName!=null?medName:("Medicine " + e.medicineId)) + " — " + act;
+                    String label = (e.medicineId==-1)?"Manual":(medName!=null?medName:("Medicine " + e.medicineId));
+                    String title = sdf.format(e.scheduledTime==null?e.actionTime:e.scheduledTime) + " — " + label + " — " + act;
                     String subtitle = ("TAKEN".equals(act) && e.actionTime!=null) ? ("Taken at " + sdf.format(e.actionTime)) : "";
                     m.put("title", title);
                     m.put("subtitle", subtitle);
@@ -185,6 +263,7 @@ public class HistoryActivity extends AppCompatActivity {
     }
 
     static class DayCell { final java.util.Date day; final int status; DayCell(java.util.Date d,int s){ day=d; status=s; }}
+    static class DayStats { int scheduled; int taken; boolean snoozed; boolean missed; }
     interface OnDayClick { void onClick(java.util.Date day); }
     static class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.VH> {
         private final List<DayCell> cells; private final OnDayClick onDayClick;
@@ -192,7 +271,24 @@ public class HistoryActivity extends AppCompatActivity {
         void setCells(List<DayCell> newCells){ cells.clear(); cells.addAll(newCells); notifyDataSetChanged(); }
         static class VH extends RecyclerView.ViewHolder { TextView tv; VH(TextView v){ super(v); tv=v; } }
         @Override public VH onCreateViewHolder(ViewGroup parent,int viewType){ TextView tv=new TextView(parent.getContext()); tv.setPadding(8,16,8,16); tv.setTextSize(16f); tv.setGravity(android.view.Gravity.CENTER); return new VH(tv);}    
-        @Override public void onBindViewHolder(VH h, int pos){ DayCell c=cells.get(pos); if (c.day==null){ h.tv.setText(""); h.tv.setBackgroundColor(0x00000000); h.tv.setOnClickListener(null); return; } java.util.Calendar cal=java.util.Calendar.getInstance(); cal.setTime(c.day); h.tv.setText(String.valueOf(cal.get(java.util.Calendar.DAY_OF_MONTH))); int color = 0xFF777777; if (c.status==3) color=0xFF2E7D32; else if (c.status==2) color=0xFFF9A825; else if (c.status==1) color=0xFFC62828; android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable(); bg.setCornerRadius(24f); bg.setColor(0xFF2B2B2B); bg.setStroke(4, color); h.tv.setBackground(bg); h.tv.setOnClickListener(v -> onDayClick.onClick(c.day)); }
+        @Override public void onBindViewHolder(VH h, int pos){
+            DayCell c=cells.get(pos);
+            if (c.day==null){ h.tv.setText(""); h.tv.setBackgroundColor(0x00000000); h.tv.setOnClickListener(null); return; }
+            java.util.Calendar cal=java.util.Calendar.getInstance(); cal.setTime(c.day);
+            h.tv.setText(String.valueOf(cal.get(java.util.Calendar.DAY_OF_MONTH)));
+            int fill = 0xFF3A3A3A; // default grey
+            int text = 0xFFFFFFFF;
+            if (c.status==3) fill=0xFF2E7D32; // green full
+            else if (c.status==2) fill=0xFFFFC107; // amber partial
+            else if (c.status==1) fill=0xFFB00020; // red missed
+            android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
+            bg.setCornerRadius(24f);
+            bg.setColor(fill);
+            bg.setStroke(2, 0xFFFFFFFF);
+            h.tv.setTextColor(text);
+            h.tv.setBackground(bg);
+            h.tv.setOnClickListener(v -> onDayClick.onClick(c.day));
+        }
         @Override public int getItemCount(){ return cells.size(); }
     }
 

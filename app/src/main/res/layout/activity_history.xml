@@ -5,31 +5,57 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/history_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:title="History"
+        android:subtitle="Your adherence at a glance"
+        android:titleTextColor="#FFFFFF"
+        android:subtitleTextColor="#E6E6E6"
+        android:background="#274A5D"
+        android:padding="12dp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="12dp">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_day"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="📅 Day"
-            app:cornerRadius="20dp" />
+            android:backgroundTint="#D9C8FF"
+            android:textColor="#2E2A35"
+            app:cornerRadius="28dp"
+            app:strokeColor="#FFFFFF"
+            app:strokeWidth="1dp" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_week"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="📆 Week"
-            app:cornerRadius="20dp" />
+            android:backgroundTint="#D9C8FF"
+            android:textColor="#2E2A35"
+            app:cornerRadius="28dp"
+            app:strokeColor="#FFFFFF"
+            app:strokeWidth="1dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_month"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="🗓️ Month"
-            app:cornerRadius="20dp" />
+            android:backgroundTint="#D9C8FF"
+            android:textColor="#2E2A35"
+            app:cornerRadius="28dp"
+            app:strokeColor="#FFFFFF"
+            app:strokeWidth="1dp" />
     </LinearLayout>
 
     <TextView
@@ -51,10 +77,12 @@
         android:id="@+id/pb_week"
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
+        android:layout_height="10dp"
         android:max="100"
         android:progress="0"
-        android:paddingTop="6dp" />
+        android:paddingTop="6dp"
+        android:progressTint="#7A65CC"
+        android:progressBackgroundTint="#3A3A3A" />
 
     <FrameLayout
         android:id="@+id/pie_container"
@@ -69,10 +97,43 @@
         android:textStyle="bold"
         android:paddingTop="8dp" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_prev_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="◀"
+            android:backgroundTint="#D9C8FF"
+            android:textColor="#2E2A35"
+            app:cornerRadius="20dp" />
+        <TextView
+            android:id="@+id/tv_month_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_next_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="▶"
+            android:backgroundTint="#D9C8FF"
+            android:textColor="#2E2A35"
+            app:cornerRadius="20dp" />
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_calendar"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="240dp"
         android:layout_marginTop="4dp" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -81,5 +142,12 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginTop="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Legend:  Full ✓  •  Partial ~  •  Missed ✗"
+        android:paddingTop="8dp"
+        android:textColor="#B0B0B0" />
 
 </LinearLayout>

@@ -19,18 +19,19 @@ public class ReminderReceiver extends BroadcastReceiver {
         String name = intent.getStringExtra("name");
         String dose = intent.getStringExtra("dose");
         NotificationHelper.ensureChannel(context);
+        long scheduledAt = intent.getLongExtra("scheduledAt", System.currentTimeMillis());
         com.example.smart_dosage.data.DoseEvent scheduled = new com.example.smart_dosage.data.DoseEvent();
         scheduled.medicineId = medicineId;
-        scheduled.scheduledTime = new java.util.Date();
+        scheduled.scheduledTime = new java.util.Date(scheduledAt);
         scheduled.action = "SCHEDULED";
         scheduled.actionTime = new java.util.Date();
         new Thread(() -> com.example.smart_dosage.data.AppDatabase.get(context).doseEventDao().insert(scheduled)).start();
         Intent open = new Intent(context, MainActivity.class);
         PendingIntent content = PendingIntent.getActivity(context, (int) medicineId, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        Intent taken = new Intent(context, ActionReceiver.class).setAction("TAKEN").putExtra("medicineId", medicineId);
+        Intent taken = new Intent(context, ActionReceiver.class).setAction("TAKEN").putExtra("medicineId", medicineId).putExtra("scheduledAt", scheduledAt);
         PendingIntent pTaken = PendingIntent.getBroadcast(context, (int) (medicineId + 1), taken, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        Intent snooze = new Intent(context, ActionReceiver.class).setAction("SNOOZE").putExtra("medicineId", medicineId);
+        Intent snooze = new Intent(context, ActionReceiver.class).setAction("SNOOZE").putExtra("medicineId", medicineId).putExtra("scheduledAt", scheduledAt);
         PendingIntent pSnooze = PendingIntent.getBroadcast(context, (int) (medicineId + 2), snooze, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID)
@@ -50,7 +51,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         nm.notify((int) medicineId, b.build());
 
         android.app.AlarmManager am = (android.app.AlarmManager) context.getSystemService(android.content.Context.ALARM_SERVICE);
-        android.content.Intent check = new android.content.Intent(context, MissedCheckReceiver.class).putExtra("medicineId", medicineId).putExtra("scheduled", System.currentTimeMillis());
+        android.content.Intent check = new android.content.Intent(context, MissedCheckReceiver.class).putExtra("medicineId", medicineId).putExtra("scheduled", scheduledAt);
         android.app.PendingIntent pi = android.app.PendingIntent.getBroadcast(context, (int)(medicineId+1000), check, android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
         long trigger = System.currentTimeMillis() + 30 * 60_000L; // 30-min grace
         am.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, trigger, pi);

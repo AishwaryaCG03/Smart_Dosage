@@ -16,7 +16,8 @@ public class ActionReceiver extends BroadcastReceiver {
         long medicineId = intent.getLongExtra("medicineId", -1);
         DoseEvent e = new DoseEvent();
         e.medicineId = medicineId;
-        e.scheduledTime = new Date();
+        long scheduledAt = intent.getLongExtra("scheduledAt", System.currentTimeMillis());
+        e.scheduledTime = new Date(scheduledAt);
         e.action = action;
         e.actionTime = new Date();
         new Thread(() -> AppDatabase.get(context).doseEventDao().insert(e)).start();

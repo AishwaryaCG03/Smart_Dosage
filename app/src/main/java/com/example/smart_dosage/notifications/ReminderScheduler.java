@@ -72,6 +72,7 @@ public class ReminderScheduler {
         i.putExtra("medicineId", m.id);
         i.putExtra("name", m.name);
         i.putExtra("dose", m.strength + " • " + m.dosageAmount);
+        i.putExtra("scheduledAt", triggerAtMillis);
         PendingIntent pi = PendingIntent.getBroadcast(context, (int) m.id, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pi);
     }

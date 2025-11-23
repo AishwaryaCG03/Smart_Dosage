@@ -33,6 +33,8 @@ public class AddMedicineActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_medicine);
 
+        // no auto-complete in simple layout
+
         Spinner spType = findViewById(R.id.sp_schedule_type);
         ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"TIMES","EVERY_X_HOURS","WEEKDAYS"});
         ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -42,36 +44,43 @@ public class AddMedicineActivity extends AppCompatActivity {
             TimePickerDialog dlg = new TimePickerDialog(AddMedicineActivity.this, (view, hourOfDay, minute) -> {
                 String t = String.format("%02d:%02d", hourOfDay, minute);
                 times.add(t);
-                ((TextView)findViewById(R.id.tv_times)).setText(String.join(", ", times));
+                TextView tv = findViewById(R.id.tv_times);
+                if (tv != null) tv.setText(String.join(", ", times));
             }, 8, 0, true);
             dlg.show();
         });
+
+        // No +/- steppers in simple layout
 
         EditText etStart = findViewById(R.id.et_start_date);
         EditText etEnd = findViewById(R.id.et_end_date);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Calendar cal = java.util.Calendar.getInstance();
-        etStart.setText(sdf.format(cal.getTime()));
-        etStart.setFocusable(false);
-        etStart.setClickable(true);
-        etEnd.setFocusable(false);
-        etEnd.setClickable(true);
-        etStart.setOnClickListener(v -> {
-            java.util.Calendar c = java.util.Calendar.getInstance();
-            new android.app.DatePickerDialog(AddMedicineActivity.this, (picker, y, m, d) -> {
-                java.util.Calendar picked = java.util.Calendar.getInstance();
-                picked.set(y, m, d);
-                etStart.setText(sdf.format(picked.getTime()));
-            }, c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH)).show();
-        });
-        etEnd.setOnClickListener(v -> {
-            java.util.Calendar c = java.util.Calendar.getInstance();
-            new android.app.DatePickerDialog(AddMedicineActivity.this, (picker, y, m, d) -> {
-                java.util.Calendar picked = java.util.Calendar.getInstance();
-                picked.set(y, m, d);
-                etEnd.setText(sdf.format(picked.getTime()));
-            }, c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH)).show();
-        });
+        if (etStart != null) {
+            etStart.setText(sdf.format(cal.getTime()));
+            etStart.setFocusable(false);
+            etStart.setClickable(true);
+            etStart.setOnClickListener(v -> {
+                java.util.Calendar c = java.util.Calendar.getInstance();
+                new android.app.DatePickerDialog(AddMedicineActivity.this, (picker, y, m, d) -> {
+                    java.util.Calendar picked = java.util.Calendar.getInstance();
+                    picked.set(y, m, d);
+                    etStart.setText(sdf.format(picked.getTime()));
+                }, c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH)).show();
+            });
+        }
+        if (etEnd != null) {
+            etEnd.setFocusable(false);
+            etEnd.setClickable(true);
+            etEnd.setOnClickListener(v -> {
+                java.util.Calendar c = java.util.Calendar.getInstance();
+                new android.app.DatePickerDialog(AddMedicineActivity.this, (picker, y, m, d) -> {
+                    java.util.Calendar picked = java.util.Calendar.getInstance();
+                    picked.set(y, m, d);
+                    etEnd.setText(sdf.format(picked.getTime()));
+                }, c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH)).show();
+            });
+        }
 
         findViewById(R.id.btn_photo).setOnClickListener(v -> {
             Intent pick = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -105,7 +114,8 @@ public class AddMedicineActivity extends AppCompatActivity {
                 try { m.refills = Integer.parseInt(etRefills.getText().toString()); } catch (Exception e) { m.refills = 0; }
                 m.photoUri = photoUri;
                 try { m.initialSupply = Integer.parseInt(etInitialSupply.getText().toString()); } catch (Exception e) { m.initialSupply = 0; }
-                m.scheduleType = spType.getSelectedItem().toString();
+                String sel = spType.getSelectedItem().toString();
+                m.scheduleType = sel;
                 try { m.intervalHours = Integer.parseInt(etInterval.getText().toString()); } catch (Exception e) { m.intervalHours = null; }
                 if (etWeekdays.getText() != null && etWeekdays.getText().length() > 0) {
                     String[] ds = etWeekdays.getText().toString().split(",");
@@ -149,6 +159,7 @@ public class AddMedicineActivity extends AppCompatActivity {
         if (requestCode == REQ_PHOTO && resultCode == RESULT_OK && data != null) {
             Uri uri = data.getData();
             photoUri = uri != null ? uri.toString() : null;
+            // no preview display in simple layout
         }
     }
 }
