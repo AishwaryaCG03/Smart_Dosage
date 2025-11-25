@@ -30,13 +30,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".AuthActivity" android:exported="false" />
         <activity android:name=".AddMedicineActivity" android:exported="false" />
-        <activity android:name=".PrescriptionScanActivity" android:exported="false" />
         <activity android:name=".HistoryActivity" android:exported="false" />
         <activity android:name=".ChatActivity" android:exported="false" />
         <activity android:name=".SupplyActivity" android:exported="false" />
         <activity android:name=".CaretakerActivity" android:exported="false" />
         <activity android:name=".SettingsActivity" android:exported="false" />
+        <activity android:name=".DoctorPackActivity" android:exported="false" />
+        <activity android:name=".SideEffectsActivity" android:exported="false" />
+        <activity android:name=".BudgetActivity" android:exported="false" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
 
         <receiver android:name="com.example.smart_dosage.notifications.ReminderReceiver" android:exported="false" />
         <receiver android:name="com.example.smart_dosage.notifications.ActionReceiver" android:exported="false" />
@@ -47,6 +59,7 @@
         </receiver>
         <receiver android:name="com.example.smart_dosage.notifications.RefillReceiver" android:exported="false" />
         <receiver android:name="com.example.smart_dosage.notifications.MissedCheckReceiver" android:exported="false" />
+        <receiver android:name="com.example.smart_dosage.notifications.EscalationReceiver" android:exported="false" />
     </application>
 
 </manifest>

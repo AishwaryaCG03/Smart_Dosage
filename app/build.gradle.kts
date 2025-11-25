@@ -48,6 +48,7 @@ dependencies {
     annotationProcessor(libs.glide.compiler)
     implementation(libs.cardview)
     implementation(libs.play.services.location)
+    implementation("androidx.gridlayout:gridlayout:1.0.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

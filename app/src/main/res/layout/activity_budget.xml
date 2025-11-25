@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        app:title="Smart Dosage"
+        app:subtitle="Budget View"
+        android:titleTextColor="@color/white"
+        android:subtitleTextColor="@color/white"
+        android:background="@color/accent_green"
+        android:padding="12dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_item_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Medicine or item name"
+            android:textColor="#000000"
+            android:textColorHint="#000000" />
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_item_cost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Monthly cost (e.g., 250.0)"
+            android:inputType="numberDecimal"
+            android:textColor="#000000"
+            android:textColorHint="#000000"
+            android:layout_marginTop="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add"
+            android:textColor="#000000"
+            app:cornerRadius="20dp"
+            android:layout_marginTop="12dp" />
+
+        <TextView
+            android:id="@+id/tv_total"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:paddingTop="16dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_budget_items"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Refresh"
+            android:textColor="#000000"
+            app:cornerRadius="20dp"
+            android:layout_marginTop="12dp" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -22,17 +22,31 @@ public class ChatActivity extends AppCompatActivity {
     private List<Medicine> meds;
     private final java.util.List<ChatMessage> messages = new java.util.ArrayList<>();
     private ChatAdapter adapter;
+    private RecyclerView rv;
+    private android.view.View typing;
+    private android.animation.ObjectAnimator typingAnim;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-        RecyclerView rv = findViewById(R.id.rv_messages);
+        rv = findViewById(R.id.rv_messages);
         rv.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ChatAdapter(messages);
         rv.setAdapter(adapter);
+        rv.setItemAnimator(new androidx.recyclerview.widget.DefaultItemAnimator());
+        typing = findViewById(R.id.typing_indicator);
+        if (typing != null) {
+            typing.setAlpha(1f);
+            typingAnim = android.animation.ObjectAnimator.ofFloat(typing, "alpha", 0.6f, 1f);
+            typingAnim.setDuration(600);
+            typingAnim.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+            typingAnim.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+        }
 
         new Thread(() -> meds = AppDatabase.get(ChatActivity.this).medicineDao().getAllSync()).start();
+
+        findViewById(R.id.btn_settings).setOnClickListener(v -> startActivity(new android.content.Intent(ChatActivity.this, SettingsActivity.class)));
 
         findViewById(R.id.btn_send).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,11 +55,16 @@ public class ChatActivity extends AppCompatActivity {
                 if (q == null || q.trim().isEmpty()) return;
                 ((EditText)findViewById(R.id.et_input)).setText("");
                 addMessage(q, true);
+                final int thinkingIndex;
+                addMessage("Thinking…", false);
+                thinkingIndex = messages.size()-1;
+                if (typing != null) typing.setVisibility(android.view.View.VISIBLE);
+                if (typingAnim != null) typingAnim.start();
                 new Thread(() -> {
                     String a = remoteAnswer(q);
                     if (a == null || a.trim().isEmpty()) a = answer(q);
                     final String fa = a;
-                    runOnUiThread(() -> addMessage(fa, false));
+                    runOnUiThread(() -> { messages.set(thinkingIndex, new ChatMessage(fa, false)); adapter.notifyItemChanged(thinkingIndex); rv.scrollToPosition(adapter.getItemCount()-1); if (typing != null) typing.setVisibility(android.view.View.GONE); if (typingAnim != null) typingAnim.cancel(); typing.setAlpha(1f); });
                 }).start();
             }
         });
@@ -72,20 +91,39 @@ public class ChatActivity extends AppCompatActivity {
             android.content.SharedPreferences sp = getSharedPreferences("settings", MODE_PRIVATE);
             String base = sp.getString("ai_base_url", null);
             String key = sp.getString("ai_api_key", null);
-            if (base == null || key == null) return null;
+            if (base == null) return null;
             boolean isGemini = base.contains("generativelanguage.googleapis.com");
-            String fullUrl = isGemini ? (base + (base.contains("?")?"&":"?") + "key=" + key) : base;
+            boolean isOpenAI = base.contains("openai.com");
+            boolean isOpenRouter = base.contains("openrouter.ai");
+            boolean isLocal = false;
+            try { java.net.URI u = new java.net.URI(base); String h = u.getHost(); if (h != null) { String lh = h.toLowerCase(); isLocal = lh.equals("localhost") || lh.equals("127.0.0.1") || lh.startsWith("10.") || lh.startsWith("192.168."); } } catch (Exception ignore) {}
+            if (isGemini && (key == null || key.isEmpty())) return null;
+            if (!isGemini && !isLocal && (key == null || key.isEmpty())) return null;
+            String correctedBase = base;
+            if (isGemini) {
+                correctedBase = correctedBase.replace("/v1beta/", "/v1/");
+                correctedBase = correctedBase.replace("gemini-1.5-flash:", "gemini-1.5-flash-latest:");
+            }
+            String fullUrl = isGemini ? (correctedBase + (correctedBase.contains("?")?"&":"?" ) + "key=" + key) : correctedBase;
             java.net.URL url = new java.net.URL(fullUrl);
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
-            if (!isGemini) conn.setRequestProperty("Authorization", "Bearer " + key);
+            if (!isGemini && key != null && !key.isEmpty()) conn.setRequestProperty("Authorization", "Bearer " + key);
             conn.setDoOutput(true);
             String body;
             if (isGemini) {
                 org.json.JSONObject part = new org.json.JSONObject(); part.put("text", q);
                 org.json.JSONObject content = new org.json.JSONObject(); content.put("parts", new org.json.JSONArray().put(part));
                 org.json.JSONObject root = new org.json.JSONObject(); root.put("contents", new org.json.JSONArray().put(content));
+                body = root.toString();
+            } else if (isOpenAI || isOpenRouter) {
+                String model = getSharedPreferences("settings", MODE_PRIVATE).getString("ai_model_id", isOpenRouter?"openai/gpt-4o-mini":"gpt-4o-mini");
+                org.json.JSONObject root = new org.json.JSONObject();
+                root.put("model", model);
+                org.json.JSONArray msgs = new org.json.JSONArray();
+                org.json.JSONObject m = new org.json.JSONObject(); m.put("role","user"); m.put("content", q); msgs.put(m);
+                root.put("messages", msgs);
                 body = root.toString();
             } else {
                 body = "{\"inputs\": " + JSONObject.quote(q) + "}";
@@ -135,6 +173,18 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 }
             } catch (Exception ignore) {}
+            // Try to surface structured error from providers
+            try {
+                JSONObject o = new JSONObject(resp);
+                if (o.has("error")) {
+                    JSONObject err = o.getJSONObject("error");
+                    String msg = err.optString("message");
+                    if (msg != null && !msg.isEmpty()) {
+                        String hint = isGemini ? "\nHint: Use v1/models/gemini-1.5-flash-latest:generateContent and a Google AI Studio key." : "";
+                        return "AI error: " + msg + hint;
+                    }
+                }
+            } catch (Exception ignore) {}
             // If plain text, strip any tags and return
             String clean = resp.replaceAll("<[^>]+>", " ").replaceAll("\\s+", " ").trim();
             if (!clean.isEmpty()) return clean;
@@ -153,6 +203,7 @@ public class ChatActivity extends AppCompatActivity {
     private void addMessage(String text, boolean fromUser) {
         messages.add(new ChatMessage(text, fromUser));
         adapter.notifyItemInserted(messages.size()-1);
+        if (rv != null) rv.scrollToPosition(adapter.getItemCount()-1);
     }
 
     static class ChatMessage { final String text; final boolean fromUser; ChatMessage(String t, boolean u){ text=t; fromUser=u; } }
@@ -160,25 +211,66 @@ public class ChatActivity extends AppCompatActivity {
     static class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.VH> {
         private final java.util.List<ChatMessage> items;
         ChatAdapter(java.util.List<ChatMessage> items){ this.items = items; }
-        static class VH extends RecyclerView.ViewHolder { android.widget.TextView tv; VH(android.widget.TextView v){ super(v); tv=v; } }
+        static class VH extends RecyclerView.ViewHolder {
+            android.widget.LinearLayout root;
+            android.widget.TextView avatar;
+            android.widget.TextView bubble;
+            VH(android.widget.LinearLayout v){ super(v); root=v; avatar=(android.widget.TextView)v.getChildAt(0); bubble=(android.widget.TextView)v.getChildAt(1); }
+        }
         @Override public int getItemViewType(int position){ return items.get(position).fromUser?1:0; }
         @NonNull @Override
         public VH onCreateViewHolder(@NonNull android.view.ViewGroup parent, int viewType) {
-            android.widget.TextView tv = new android.widget.TextView(parent.getContext());
-            tv.setTextSize(16f);
-            tv.setPadding(24,16,24,16);
-            android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-            lp.setMargins(12,12,12,12);
-            lp.gravity = viewType==1 ? android.view.Gravity.END : android.view.Gravity.START;
-            tv.setLayoutParams(lp);
+            android.widget.LinearLayout root = new android.widget.LinearLayout(parent.getContext());
+            root.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            root.setPadding(12,12,12,12);
+            android.widget.LinearLayout.LayoutParams rp = new android.widget.LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            rp.setMargins(0,6,0,6);
+            root.setLayoutParams(rp);
+
+            android.widget.TextView avatar = new android.widget.TextView(parent.getContext());
+            android.widget.LinearLayout.LayoutParams ap = new android.widget.LinearLayout.LayoutParams(dp(parent,36), dp(parent,36));
+            ap.setMargins(8,8,8,8);
+            avatar.setLayoutParams(ap);
+            avatar.setGravity(android.view.Gravity.CENTER);
+            avatar.setTextColor(0xFFFFFFFF);
+            android.graphics.drawable.GradientDrawable abg = new android.graphics.drawable.GradientDrawable();
+            abg.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            abg.setColor(viewType==1?0xFF10A37F:0xFF5865F2);
+            avatar.setBackground(abg);
+            avatar.setText(viewType==1?"You":"AI");
+
+            android.widget.TextView bubble = new android.widget.TextView(parent.getContext());
+            bubble.setTextSize(16f);
+            bubble.setPadding(26,20,26,20);
+            android.widget.LinearLayout.LayoutParams bp = new android.widget.LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            bp.setMargins(10,10,10,10);
+            bp.gravity = viewType==1 ? android.view.Gravity.END : android.view.Gravity.START;
+            bubble.setLayoutParams(bp);
             android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
             bg.setCornerRadius(24f);
-            bg.setColor(viewType==1?0xFFBB86FC:0xFF3E3E3E);
-            tv.setBackground(bg);
-            tv.setTextColor(0xFFFFFFFF);
-            return new VH(tv);
+            int aiBg = 0xFFFFFFFF;
+            int userBg = 0xFF10A37F;
+            bg.setColor(viewType==1?userBg:aiBg);
+            bg.setStroke(2, viewType==1?0x3310A37F:0x33B0BEC5);
+            bubble.setBackground(bg);
+            bubble.setTextColor(viewType==1?0xFFFFFFFF:0xFF2C3E50);
+            bubble.setLineSpacing(0f, 1.12f);
+            bubble.setElevation(4f);
+
+            if (viewType==1) { root.setGravity(android.view.Gravity.END); root.addView(bubble); root.addView(avatar); }
+            else { root.setGravity(android.view.Gravity.START); root.addView(avatar); root.addView(bubble); }
+
+            return new VH(root);
         }
-        @Override public void onBindViewHolder(@NonNull VH holder, int position) { holder.tv.setText(items.get(position).text); }
+        @Override public void onBindViewHolder(@NonNull VH holder, int position) {
+            holder.bubble.setText(items.get(position).text);
+            boolean fromUser = items.get(position).fromUser;
+            holder.root.setAlpha(0f);
+            holder.root.setTranslationX(fromUser ? dp(holder.root, 24) : -dp(holder.root, 24));
+            holder.root.animate().alpha(1f).translationX(0f).setDuration(160).start();
+        }
         @Override public int getItemCount(){ return items.size(); }
+
+        private int dp(android.view.View v, int d){ return (int) (d * v.getResources().getDisplayMetrics().density); }
     }
 }

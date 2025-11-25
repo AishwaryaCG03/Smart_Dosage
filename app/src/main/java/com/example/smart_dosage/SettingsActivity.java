@@ -51,5 +51,28 @@ public class SettingsActivity extends AppCompatActivity {
                 android.widget.Toast.makeText(SettingsActivity.this, "AI settings saved", android.widget.Toast.LENGTH_SHORT).show();
             }
         });
+
+        findViewById(R.id.btn_doctor_pack).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(SettingsActivity.this, com.example.smart_dosage.DoctorPackActivity.class));
+        });
+
+        ((com.google.android.material.materialswitch.MaterialSwitch)findViewById(R.id.switch_escalate_call)).setChecked(sp.getBoolean("escalate_call", true));
+        ((com.google.android.material.materialswitch.MaterialSwitch)findViewById(R.id.switch_escalate_sos)).setChecked(sp.getBoolean("escalate_sos", true));
+        ((android.widget.EditText)findViewById(R.id.et_sos_number)).setText(sp.getString("sos_number", "112"));
+        findViewById(R.id.btn_save_escalation).setOnClickListener(v -> {
+            boolean call = ((com.google.android.material.materialswitch.MaterialSwitch)findViewById(R.id.switch_escalate_call)).isChecked();
+            boolean sos = ((com.google.android.material.materialswitch.MaterialSwitch)findViewById(R.id.switch_escalate_sos)).isChecked();
+            String num = ((android.widget.EditText)findViewById(R.id.et_sos_number)).getText().toString();
+            sp.edit().putBoolean("escalate_call", call).putBoolean("escalate_sos", sos).putString("sos_number", num).apply();
+            android.widget.Toast.makeText(SettingsActivity.this, "Escalation settings saved", android.widget.Toast.LENGTH_SHORT).show();
+        });
+
+        findViewById(R.id.btn_side_effects).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(SettingsActivity.this, com.example.smart_dosage.SideEffectsActivity.class));
+        });
+
+        findViewById(R.id.btn_budget_view).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(SettingsActivity.this, com.example.smart_dosage.BudgetActivity.class));
+        });
     }
 }

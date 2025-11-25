@@ -34,6 +34,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+        android.content.SharedPreferences sp = getSharedPreferences("auth", MODE_PRIVATE);
+        boolean logged = sp.getBoolean("logged_in", false);
+        if (!logged) {
+            startActivity(new Intent(this, AuthActivity.class));
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -48,6 +55,34 @@ public class MainActivity extends AppCompatActivity {
         list.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MedicineAdapter(medicine -> {
             ReminderScheduler.scheduleForMedicine(this, medicine);
+        }, medicine -> {
+            android.widget.EditText etName = new android.widget.EditText(MainActivity.this);
+            etName.setHint("Name");
+            etName.setText(medicine.name);
+            android.widget.EditText etStrength = new android.widget.EditText(MainActivity.this);
+            etStrength.setHint("Strength");
+            etStrength.setText(medicine.strength);
+            android.widget.EditText etInstructions = new android.widget.EditText(MainActivity.this);
+            etInstructions.setHint("Instructions");
+            etInstructions.setText(medicine.instructions);
+            android.widget.LinearLayout cont = new android.widget.LinearLayout(MainActivity.this);
+            cont.setOrientation(android.widget.LinearLayout.VERTICAL);
+            int pad = (int) (16 * getResources().getDisplayMetrics().density);
+            cont.setPadding(pad, pad/2, pad, 0);
+            cont.addView(etName);
+            cont.addView(etStrength);
+            cont.addView(etInstructions);
+            new android.app.AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Edit medicine")
+                    .setView(cont)
+                    .setPositiveButton("Save", (d,w) -> {
+                        medicine.name = etName.getText().toString();
+                        medicine.strength = etStrength.getText().toString();
+                        medicine.instructions = etInstructions.getText().toString();
+                        new Thread(() -> db.medicineDao().update(medicine)).start();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
         list.setAdapter(adapter);
 
@@ -67,12 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, AddMedicineActivity.class));
             }
         });
-        findViewById(R.id.btn_scan).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, PrescriptionScanActivity.class));
-            }
-        });
+        // scan feature removed
         findViewById(R.id.btn_history).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,6 +130,21 @@ public class MainActivity extends AppCompatActivity {
         if (st != null) st.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) { startActivity(new Intent(MainActivity.this, SettingsActivity.class)); }
+        });
+        View dp = findViewById(R.id.btn_doctor_pack_home);
+        if (dp != null) dp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { startActivity(new Intent(MainActivity.this, DoctorPackActivity.class)); }
+        });
+        View se = findViewById(R.id.btn_side_effects_home);
+        if (se != null) se.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { startActivity(new Intent(MainActivity.this, SideEffectsActivity.class)); }
+        });
+        View bg = findViewById(R.id.btn_budget_home);
+        if (bg != null) bg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) { startActivity(new Intent(MainActivity.this, BudgetActivity.class)); }
         });
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {

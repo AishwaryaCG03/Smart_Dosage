@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_soft_gradient"
     tools:context=".MainActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:title="Smart Dosage"
-        android:subtitle="Stay on track"
-        android:navigationIcon="@android:drawable/ic_menu_info_details"
-        android:titleTextColor="#FFFFFF"
-        android:subtitleTextColor="#E6E6E6"
-        android:background="#274A5D"
+        app:title="Smart Dosage"
+        app:subtitle="Pharmacy Vibe — Stay on schedule, stay healthy"
+        
+        android:minHeight="?attr/actionBarSize"
+        android:contentInsetStartWithNavigation="0dp"
+        android:contentInsetStart="0dp"
+        android:contentInsetLeft="0dp"
+        android:contentInsetRight="0dp"
+        android:contentInsetEnd="0dp"
+        android:contentInsetEndWithActions="0dp"
         android:padding="16dp"
+        android:titleTextColor="@color/white"
+        android:subtitleTextColor="@color/white"
+        android:background="@color/accent_green"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -26,7 +34,7 @@
         android:id="@+id/medicine_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/actions_bar"
+        app:layout_constraintTop_toBottomOf="@id/actions_grid"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -38,127 +46,102 @@
         android:layout_height="wrap_content"
         android:text="No medicines yet. Tap ➕ Add to get started."
         android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@id/actions_bar"
+        app:layout_constraintTop_toBottomOf="@id/actions_grid"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
-        android:id="@+id/actions_bar"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:gravity="center"
+        android:id="@+id/actions_grid"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center_horizontal"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar">
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="➕ Add"
-            android:textColor="#2E2A35"
-            android:backgroundTint="#D9C8FF"
-            app:cornerRadius="28dp"
-            app:strokeColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="12dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_add" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_add" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Add" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_history" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_history" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="History" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_scan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📷 Scan"
-            android:textColor="#2E2A35"
-            android:backgroundTint="#D9C8FF"
-            app:cornerRadius="28dp"
-            app:strokeColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="12dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_chat" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_chat" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Chat" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_supply" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_supplies" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Supplies" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_history"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📜 History"
-            android:textColor="#2E2A35"
-            android:backgroundTint="#D9C8FF"
-            app:cornerRadius="28dp"
-            app:strokeColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="12dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_caretakers" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_caretakers" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Caretakers" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_settings" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_settings" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Settings" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_chat"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="💬 Chat"
-            android:textColor="#2E2A35"
-            android:backgroundTint="#D9C8FF"
-            app:cornerRadius="28dp"
-            app:strokeColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="12dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="16dp">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_doctor_pack_home" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_history" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Doctor Pack" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_side_effects_home" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_chat" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Side‑effects" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_supply"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📦 Supplies"
-            android:textColor="#2E2A35"
-            android:backgroundTint="#D9C8FF"
-            app:cornerRadius="28dp"
-            app:strokeColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="12dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_caretakers"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="👥 Caretakers"
-            android:textColor="#2E2A35"
-            android:backgroundTint="#D9C8FF"
-            app:cornerRadius="28dp"
-            app:strokeColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="12dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_settings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="⚙️ Settings"
-            android:textColor="#2E2A35"
-            android:backgroundTint="#D9C8FF"
-            app:cornerRadius="28dp"
-            app:strokeColor="#FFFFFF"
-            app:strokeWidth="1dp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
-            android:paddingTop="14dp"
-            android:paddingBottom="14dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView android:id="@+id/btn_budget_home" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_margin="8dp" app:cardCornerRadius="16dp" app:cardUseCompatPadding="true" app:cardBackgroundColor="@color/card_bg" app:strokeColor="@color/accent_green" app:strokeWidth="1dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="12dp">
+                    <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_supplies" android:tint="@color/accent_green" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Budget" android:textStyle="bold" android:textColor="@color/text_primary" android:paddingTop="6dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <Space android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+        </LinearLayout>
     </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_add"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="20dp"
+        app:tint="#FFFFFF"
+        app:backgroundTint="#10A37F" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

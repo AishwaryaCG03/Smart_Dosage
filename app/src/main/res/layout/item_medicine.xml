@@ -3,21 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_margin="12dp"
     app:cardUseCompatPadding="true"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="20dp"
+    app:cardElevation="6dp"
+    app:cardBackgroundColor="@color/card_bg">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="16dp">
 
         <ImageView
             android:id="@+id/photo"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_launcher_foreground" />
 
@@ -26,32 +27,51 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_weight="1"
-            android:paddingStart="12dp">
+            android:paddingStart="16dp">
 
             <TextView
                 android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:textSize="16sp" />
+                android:textSize="18sp"
+                android:textColor="@color/text_primary" />
 
             <TextView
                 android:id="@+id/details"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary" />
 
             <TextView
                 android:id="@+id/times"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary" />
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_schedule"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="⏰ Schedule"
-            app:cornerRadius="16dp" />
+            android:orientation="vertical">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_schedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Schedule"
+                app:cornerRadius="20dp"
+                android:backgroundTint="@color/chip_bg"
+                android:textColor="@color/text_primary" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit"
+                android:layout_marginTop="8dp"
+                app:cornerRadius="20dp"
+                android:backgroundTint="@color/chip_bg"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

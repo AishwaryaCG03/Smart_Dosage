@@ -85,4 +85,12 @@ public class ReminderScheduler {
         long trigger = System.currentTimeMillis() + minutes * 60_000L;
         am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, trigger, pi);
     }
+
+    public static void scheduleAdaptiveCatchup(Context context, com.example.smart_dosage.data.Medicine m, long scheduledMillis) {
+        long base = System.currentTimeMillis();
+        long minDelay = 45 * 60_000L;
+        long spacing = (m.intervalHours != null ? m.intervalHours : 6) * 60L * 60L * 1000L;
+        long trigger = Math.max(base + minDelay, scheduledMillis + spacing / 2);
+        setAlarm(context, m, trigger);
+    }
 }

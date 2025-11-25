@@ -2,7 +2,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/accent_green"
+        android:minHeight="?attr/actionBarSize"
+        android:padding="16dp"
+        app:title="Smart Dosage"
+        app:subtitle="Pharmacy Vibe — Stay on schedule, stay healthy"
+        
+        android:titleTextColor="@color/white"
+        android:subtitleTextColor="@color/white">
+        <ImageButton
+            android:id="@+id/btn_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_settings"
+            android:tint="@color/white"
+            android:background="@android:color/transparent" />
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_messages"
@@ -15,19 +36,57 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_input"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp">
+        <com.google.android.material.chip.Chip
+            android:id="@+id/typing_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI is typing…"
+            style="@style/Widget.MaterialComponents.Chip.Action"
+            app:chipBackgroundColor="@color/chip_bg"
+            android:textColor="@color/text_primary"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="💬 Ask anything" />
-        <com.google.android.material.button.MaterialButton
+            app:cardCornerRadius="28dp"
+            app:cardUseCompatPadding="true"
+            app:cardBackgroundColor="@color/card_bg">
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:boxBackgroundMode="filled"
+                app:boxCornerRadiusTopStart="24dp"
+                app:boxCornerRadiusTopEnd="24dp"
+                app:boxCornerRadiusBottomStart="24dp"
+                app:boxCornerRadiusBottomEnd="24dp"
+                app:hintEnabled="false">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ask anything"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btn_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="➡️"
-            app:cornerRadius="20dp" />
+            android:src="@drawable/ic_chat"
+            app:tint="@color/white"
+            app:backgroundTint="@color/accent_green"
+            android:layout_marginStart="12dp" />
     </LinearLayout>
 
 </LinearLayout>

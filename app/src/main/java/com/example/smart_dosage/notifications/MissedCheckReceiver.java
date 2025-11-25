@@ -12,6 +12,7 @@ import com.example.smart_dosage.R;
 import com.example.smart_dosage.data.AppDatabase;
 import com.example.smart_dosage.data.Caretaker;
 import com.example.smart_dosage.data.DoseEvent;
+import com.example.smart_dosage.data.Medicine;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -39,6 +40,11 @@ public class MissedCheckReceiver extends BroadcastReceiver {
             missed.actionTime = now;
             new Thread(() -> AppDatabase.get(context).doseEventDao().insert(missed)).start();
 
+            Medicine m = AppDatabase.get(context).medicineDao().getById(medicineId);
+            if (m != null) {
+                ReminderScheduler.scheduleAdaptiveCatchup(context, m, scheduledMillis);
+            }
+
             NotificationHelper.ensureChannel(context);
             NotificationCompat.Builder b = new NotificationCompat.Builder(context, NotificationHelper.CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -58,6 +64,12 @@ public class MissedCheckReceiver extends BroadcastReceiver {
                     context.startActivity(sms);
                 }
             }).start();
+
+            android.app.AlarmManager am2 = (android.app.AlarmManager) context.getSystemService(android.content.Context.ALARM_SERVICE);
+            android.content.Intent esc = new android.content.Intent(context, EscalationReceiver.class).putExtra("medicineId", medicineId);
+            android.app.PendingIntent pi2 = android.app.PendingIntent.getBroadcast(context, (int)(medicineId+1100), esc, android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE);
+            long trigger2 = System.currentTimeMillis() + 30 * 60_000L;
+            am2.setExactAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, trigger2, pi2);
         }
     }
 }

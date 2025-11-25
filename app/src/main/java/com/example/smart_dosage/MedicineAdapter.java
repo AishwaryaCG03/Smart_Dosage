@@ -16,15 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.VH> {
-    public interface OnScheduleClick {
-        void onClick(Medicine medicine);
-    }
+    public interface OnScheduleClick { void onClick(Medicine medicine); }
+    public interface OnEditClick { void onClick(Medicine medicine); }
 
     private List<Medicine> items = new ArrayList<>();
     private final OnScheduleClick onScheduleClick;
+    private final OnEditClick onEditClick;
 
-    public MedicineAdapter(OnScheduleClick listener) {
-        this.onScheduleClick = listener;
+    public MedicineAdapter(OnScheduleClick scheduleListener, OnEditClick editListener) {
+        this.onScheduleClick = scheduleListener;
+        this.onEditClick = editListener;
     }
 
     public void submit(List<Medicine> list) {
@@ -42,13 +43,14 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Medicine m = items.get(position);
-        holder.name.setText("💊 " + m.name);
-        holder.details.setText("🧪 " + (m.strength!=null?m.strength:"") + " • " + m.dosageAmount);
-        holder.times.setText("⏱️ " + (m.times!=null?String.join(", ", m.times):""));
+        holder.name.setText(m.name);
+        holder.details.setText((m.strength!=null?m.strength:"") + " • " + m.dosageAmount);
+        holder.times.setText(m.times!=null?String.join(", ", m.times):"");
         if (m.photoUri != null && !m.photoUri.isEmpty()) {
             Glide.with(holder.photo.getContext()).load(m.photoUri).into(holder.photo);
         }
         holder.schedule.setOnClickListener(v -> onScheduleClick.onClick(m));
+        if (holder.edit != null) holder.edit.setOnClickListener(v -> onEditClick.onClick(m));
     }
 
     @Override
@@ -62,6 +64,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.VH> {
         TextView details;
         TextView times;
         View schedule;
+        View edit;
 
         VH(@NonNull View itemView) {
             super(itemView);
@@ -70,6 +73,7 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.VH> {
             details = itemView.findViewById(R.id.details);
             times = itemView.findViewById(R.id.times);
             schedule = itemView.findViewById(R.id.btn_schedule);
+            edit = itemView.findViewById(R.id.btn_edit);
         }
     }
 }

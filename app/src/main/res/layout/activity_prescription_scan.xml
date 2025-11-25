@@ -3,13 +3,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:title="Smart Dosage"
+        android:subtitle="Prescription Scan"
+        android:titleTextColor="@color/text_primary"
+        android:subtitleTextColor="@color/text_secondary"
+        android:background="#FFFFFF"
+        android:padding="12dp" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_pick"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="🖼️ Pick Image"
+        android:text="Pick Image"
         app:cornerRadius="20dp" />
 
     <ListView
@@ -22,7 +33,7 @@
         android:id="@+id/btn_add_all"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="✅ Add All"
+        android:text="Add All"
         app:cornerRadius="20dp" />
 
 </LinearLayout>

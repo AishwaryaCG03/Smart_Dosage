@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -9,19 +10,40 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <com.google.android.material.appbar.MaterialToolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            app:title="Smart Dosage"
+            app:subtitle="Pharmacy Vibe — Stay on schedule, stay healthy"
+            
+            android:titleTextColor="@color/white"
+            android:subtitleTextColor="@color/white"
+            android:background="@color/accent_green"
+            android:padding="12dp" />
+
         <Spinner
             android:id="@+id/sp_medicine"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="@color/card_bg"
+            android:padding="8dp"
+            android:popupTheme="@style/Theme.Smart_dosage" />
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
             android:id="@+id/card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
             android:layout_marginTop="12dp"
-            android:background="@android:color/darker_gray">
+            app:cardCornerRadius="20dp"
+            app:cardUseCompatPadding="true"
+            app:cardBackgroundColor="@color/card_bg">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
 
             <TextView
                 android:id="@+id/tv_med_name"
@@ -29,14 +51,24 @@
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
                 android:textSize="18sp"
-                android:text="Medicine" />
+                android:text="Medicine"
+                android:textColor="@color/text_primary" />
 
             <TextView
                 android:id="@+id/tv_days_left"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Estimated days left: 0"
-                android:paddingTop="4dp" />
+                android:paddingTop="4dp"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tv_runout_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Run-out date: —"
+                android:paddingTop="2dp"
+                android:textColor="@color/text_secondary" />
 
             <ProgressBar
                 android:id="@+id/pb_supply"
@@ -45,14 +77,16 @@
                 android:layout_height="8dp"
                 android:max="100"
                 android:progress="0"
-                android:paddingTop="8dp" />
+                android:paddingTop="8dp"
+                android:progressTint="@color/accent_green" />
 
             <TextView
                 android:id="@+id/tv_progress"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="0 left out of 0"
-                android:paddingTop="4dp" />
+                android:paddingTop="4dp"
+                android:textColor="@color/text_secondary" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -63,31 +97,74 @@
                     android:id="@+id/sw_enable_refill"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Enable refill reminder" />
+                    android:text="Enable refill reminder"
+                    android:textColor="@color/text_secondary" />
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_lead_days"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Lead days"
-                    android:inputType="number" />
+                    android:inputType="number"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary" />
             </LinearLayout>
 
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="8dp">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_take_one"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="➖ Take dose"
+                    android:backgroundTint="@color/accent_green"
+                    android:textColor="@color/white"
+                    app:cornerRadius="16dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_add_refill"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🛒 Add refill"
+                    android:backgroundTint="@color/accent_green"
+                    android:textColor="@color/white"
+                    app:cornerRadius="16dp" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_pharmacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📍 Find nearby pharmacy"
+                android:backgroundTint="@color/accent_blue"
+                android:textColor="@color/white"
+                android:layout_marginTop="8dp"
+                app:cornerRadius="20dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_remaining"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Remaining supply"
-            android:inputType="number" />
+            android:inputType="number"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="💾 Save"
-            app:cornerRadius="20dp" />
+            android:backgroundTint="@color/accent_blue"
+            android:textColor="@color/white"
+            app:cornerRadius="28dp" />
 
     </LinearLayout>
 

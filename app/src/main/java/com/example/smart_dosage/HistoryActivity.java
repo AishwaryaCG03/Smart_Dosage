@@ -45,6 +45,7 @@ public class HistoryActivity extends AppCompatActivity {
         timelineAdapter = new TimelineAdapter(timeline);
         rvTimeline.setAdapter(timelineAdapter);
         rvCalendar.setLayoutManager(new GridLayoutManager(this, 7));
+        rvCalendar.setItemAnimator(new androidx.recyclerview.widget.DefaultItemAnimator());
         calendarAdapter = new CalendarAdapter(new ArrayList<>(), day -> {
             selectedDay = day;
             showDayActions(day);
@@ -174,7 +175,8 @@ public class HistoryActivity extends AppCompatActivity {
             }
             final int finalStreak = totalGreen;
             runOnUiThread(() -> {
-                ((android.widget.ProgressBar)findViewById(R.id.pb_week)).setProgress(finalWeekPct);
+                com.google.android.material.progressindicator.LinearProgressIndicator lpi = findViewById(R.id.pb_week);
+                if (lpi != null) lpi.setProgress(finalWeekPct);
                 tvMetrics.setText("Weekly adherence: " + finalWeekPct + "% • Monthly: " + finalMonthPct + "%");
                 tvStreak.setText("🏅 Streak: " + finalStreak + " days");
                 ObjectAnimator anim = ObjectAnimator.ofFloat(tvStreak, "scaleX", 1f, 1.06f, 1f);
@@ -270,21 +272,21 @@ public class HistoryActivity extends AppCompatActivity {
         CalendarAdapter(List<DayCell> cells, OnDayClick click){ this.cells=cells; this.onDayClick=click; }
         void setCells(List<DayCell> newCells){ cells.clear(); cells.addAll(newCells); notifyDataSetChanged(); }
         static class VH extends RecyclerView.ViewHolder { TextView tv; VH(TextView v){ super(v); tv=v; } }
-        @Override public VH onCreateViewHolder(ViewGroup parent,int viewType){ TextView tv=new TextView(parent.getContext()); tv.setPadding(8,16,8,16); tv.setTextSize(16f); tv.setGravity(android.view.Gravity.CENTER); return new VH(tv);}    
+        @Override public VH onCreateViewHolder(ViewGroup parent,int viewType){ TextView tv=new TextView(parent.getContext()); tv.setPadding(8,16,8,16); tv.setTextSize(16f); tv.setGravity(android.view.Gravity.CENTER); RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT); lp.setMargins(6,6,6,6); tv.setLayoutParams(lp); return new VH(tv);}    
         @Override public void onBindViewHolder(VH h, int pos){
             DayCell c=cells.get(pos);
             if (c.day==null){ h.tv.setText(""); h.tv.setBackgroundColor(0x00000000); h.tv.setOnClickListener(null); return; }
             java.util.Calendar cal=java.util.Calendar.getInstance(); cal.setTime(c.day);
             h.tv.setText(String.valueOf(cal.get(java.util.Calendar.DAY_OF_MONTH)));
-            int fill = 0xFF3A3A3A; // default grey
-            int text = 0xFFFFFFFF;
-            if (c.status==3) fill=0xFF2E7D32; // green full
-            else if (c.status==2) fill=0xFFFFC107; // amber partial
-            else if (c.status==1) fill=0xFFB00020; // red missed
+            int fill = 0xFFF0F3F4;
+            int text = 0xFF2E2A35;
+            if (c.status==3) fill=0xFF4CAF50;
+            else if (c.status==2) fill=0xFFFFD54F;
+            else if (c.status==1) fill=0xFFE57373;
             android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable();
             bg.setCornerRadius(24f);
             bg.setColor(fill);
-            bg.setStroke(2, 0xFFFFFFFF);
+            bg.setStroke(2, 0x1A000000);
             h.tv.setTextColor(text);
             h.tv.setBackground(bg);
             h.tv.setOnClickListener(v -> onDayClick.onClick(c.day));
@@ -296,7 +298,11 @@ public class HistoryActivity extends AppCompatActivity {
         private final int pct;
         private final Paint pFill = new Paint(Paint.ANTI_ALIAS_FLAG);
         private final Paint pBg = new Paint(Paint.ANTI_ALIAS_FLAG);
-        PieChartView(android.content.Context ctx, int pct){ super(ctx); this.pct=pct; pFill.setStyle(Paint.Style.FILL); pFill.setColor(0xFFBB86FC); pBg.setStyle(Paint.Style.FILL); pBg.setColor(0xFF3E3E3E); }
-        @Override protected void onDraw(Canvas c){ super.onDraw(c); float w=getWidth(), h=getHeight(); float r=Math.min(w,h)/2f-8f; float cx=w/2f, cy=h/2f; RectF oval=new RectF(cx-r, cy-r, cx+r, cy+r); c.drawArc(oval, 0, 360, true, pBg); c.drawArc(oval, -90, 360f*pct/100f, true, pFill); Paint pText=new Paint(Paint.ANTI_ALIAS_FLAG); pText.setColor(0xFFFFFFFF); pText.setTextSize(36f); pText.setTextAlign(Paint.Align.CENTER); c.drawText(pct+"%", cx, cy+12f, pText);}        
+        private float sweep;
+        private android.animation.ValueAnimator animator;
+        PieChartView(android.content.Context ctx, int pct){ super(ctx); this.pct=pct; pFill.setStyle(Paint.Style.FILL); pFill.setColor(0xFF5DB9A6); pBg.setStyle(Paint.Style.FILL); pBg.setColor(0xFFE5EAEE); }
+        @Override protected void onAttachedToWindow(){ super.onAttachedToWindow(); animator = android.animation.ValueAnimator.ofFloat(0f, pct); animator.setDuration(900); animator.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator()); animator.addUpdateListener(a -> { sweep = (float) a.getAnimatedValue(); invalidate(); }); animator.start(); }
+        @Override protected void onDetachedFromWindow(){ super.onDetachedFromWindow(); if (animator != null) animator.cancel(); }
+        @Override protected void onDraw(Canvas c){ super.onDraw(c); float w=getWidth(), h=getHeight(); float r=Math.min(w,h)/2f-8f; float cx=w/2f, cy=h/2f; RectF oval=new RectF(cx-r, cy-r, cx+r, cy+r); c.drawArc(oval, 0, 360, true, pBg); c.drawArc(oval, -90, 360f*sweep/100f, true, pFill); Paint pText=new Paint(Paint.ANTI_ALIAS_FLAG); pText.setColor(0xFF2E2A35); pText.setTextSize(36f); pText.setTextAlign(Paint.Align.CENTER); c.drawText(pct+"%", cx, cy+12f, pText);}        
     }
 }
