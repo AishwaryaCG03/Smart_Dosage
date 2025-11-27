@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         app:title="Smart Dosage"
-        app:subtitle="Doctor Pack"
+        app:subtitle="Never miss a dose again"
         android:titleTextColor="@color/white"
         android:subtitleTextColor="@color/white"
         android:background="@color/accent_green"

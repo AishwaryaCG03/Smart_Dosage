@@ -13,7 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:title="Smart Dosage"
-        app:subtitle="Pharmacy Vibe — Stay on schedule, stay healthy"
+        app:subtitle="Never miss a dose again"
         
         android:minHeight="?attr/actionBarSize"
         android:contentInsetStartWithNavigation="0dp"

@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
             app:title="Smart Dosage"
-            app:subtitle="Pharmacy Vibe — Stay on schedule, stay healthy"
+            app:subtitle="Never miss a dose again"
             
             android:titleTextColor="@color/white"
             android:subtitleTextColor="@color/white"
