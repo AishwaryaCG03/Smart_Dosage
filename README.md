@@ -1,117 +1,152 @@
 # Smart Dosage
 
-Smart Dosage is a patient‑centric Android application that helps users manage medications, receive dependable reminders, track adherence and supplies, ask questions through a built‑in chat assistant, and share a doctor‑ready PDF (“Doctor Pack”) summarizing the current regimen and recent adherence.
+**Smart Dosage** is a comprehensive, patient-centric Android application designed to simplify medication management. It goes beyond simple reminders by integrating supply tracking, adherence analytics, AI-powered assistance, doctor-ready reporting, and safety nets like caretaker escalation and interaction checking.
 
-## Features
-- Medication manager with full regimen details: name, strength, dose amount, schedule (specific times, every‑X‑hours, weekdays), instructions, start/end dates, refills, initial supply, doses/day, optional photo
-- Reliable reminders with actionable notifications: Taken, Snooze, and quick Pharmacy link
-- Adherence history: timeline and calendar heat‑map with day/week/month filters
-- Supply tracking: decrement on Taken, add refills, days‑left and run‑out estimates
-- Doctor Pack PDF: one‑tap generation, robust line wrapping/pagination, open in external app or built‑in viewer, easy sharing
-- Chat assistant: local medicine‑aware answers and general Q&A via configurable AI endpoints (Gemini/OpenAI/OpenRouter/local)
-- Caretaker tools: store contacts and quick actions (call, SMS, WhatsApp, share)
+---
 
-## Architecture
-- Presentation: Activities and RecyclerViews using Material UI components
-- Domain: reminder scheduling, notification receivers, action handling, missed‑dose checks, supply management, PDF generation, chat logic
-- Data: Room database for `Medicine`, `DoseEvent`, `Supply`, `Caretaker` entities and DAOs
-- Integration: AlarmManager + PendingIntent, Notification channels, FileProvider and MediaStore for PDF sharing, HttpURLConnection for AI calls, PdfDocument/PdfRenderer for PDF
+## 🌟 Key Features
 
-## Tech Stack
-- Language: Java 11
-- Android: `compileSdk=36`, `targetSdk=36`, `minSdk=24`
-- Build: Gradle Kotlin DSL with Version Catalogs (AGP 8.13.1)
-- Core libraries:
-  - AndroidX AppCompat, Core, Activity, ConstraintLayout, RecyclerView
-  - Material Components
-  - Room (runtime + annotation processor)
-  - LiveData (Lifecycle)
-  - WorkManager (present for background tasks)
-  - Glide (images)
-  - ML Kit Text Recognition (present)
-  - Play Services Location (pharmacy navigation and future features)
-  - GridLayout, CardView
-- Testing: JUnit 4, AndroidX Test Ext JUnit, Espresso
+### 💊 Medication Management
+- **Detailed Regimens**: Store comprehensive details including name, strength, form (tablet, syrup, etc.), dose amount, and specific instructions.
+- **Flexible Scheduling**: Support for various schedules:
+  - Specific times (e.g., 8:00 AM, 8:00 PM)
+  - Intervals (e.g., Every 8 hours)
+  - Specific days of the week (e.g., Mondays and Thursdays only)
+- **Prescription Scanning (OCR)**: Built-in camera feature uses ML Kit to scan physical prescriptions and auto-fill medicine details.
+- **Photo Attachments**: Visually identify pills by attaching photos to each medicine entry.
 
-## Permissions
-- Notifications: `POST_NOTIFICATIONS` (Android 13+)
-- Exact alarms: `SCHEDULE_EXACT_ALARM` (Android 12+ permission must be enabled by the user)
-- Boot: `RECEIVE_BOOT_COMPLETED` for rescheduling alarms at device restart
-- Media/Storage: `READ_MEDIA_IMAGES` (Android 13+), legacy `READ_EXTERNAL_STORAGE` (≤ Android 12) for photo selection
-- Network: `INTERNET` for AI endpoints
-- Location: `ACCESS_FINE_LOCATION` and `ACCESS_COARSE_LOCATION` (pharmacy intent)
+### 🔔 Smart Reminders & Notifications
+- **Reliable Alarms**: Uses `AlarmManager` for exact-time notifications, ensuring reliability even on newer Android versions.
+- **Actionable Notifications**: Mark doses as "Taken" or "Snooze" directly from the notification shade.
+- **Missed Dose Detection**: Automatically flags doses as "Missed" if not acted upon within a grace period.
+- **Escalation Protocols**: If a critical dose is missed, the app can automatically notify configured caretakers via SMS or Call (configurable in Settings).
 
-## Setup
-1. Prerequisites
-   - Android Studio (Giraffe or newer)
-   - JDK 11
-   - Android SDK with API level 36
-2. Clone and open
-   - Open the project in Android Studio and let it sync dependencies
-3. Configure run device
-   - Create an emulator (Android 12/13/14) or connect a physical device
+### 📊 Adherence & History
+- **Visual Timeline**: A chronological view of all dose events (Taken, Missed, Skipped).
+- **Calendar Heatmap**: Color-coded monthly view to instantly visualize adherence patterns (Green = All Taken, Red = Missed, Orange = Partial).
+- **Streak Tracking**: Motivational streak counter based on consecutive days of perfect adherence.
+- **Weekly Stats**: Percentage-based adherence score for the last 7 days.
 
-## Build & Run
-- Android Studio: Use Run ▶ to install on the selected device
-- CLI:
-  - `./gradlew assembleDebug`
-  - `./gradlew installDebug`
+### 📦 Supply & Budget Tracking
+- **Inventory Management**: Automatically decrements supply when doses are marked as taken.
+- **Refill Alerts**: Notifications when supply drops below a custom threshold.
+- **Run-out Estimates**: Predicts exactly when current stock will be depleted.
+- **Budgeting**: Track medication costs to manage monthly healthcare expenses (`BudgetActivity`).
 
-## Configuration (Chat Assistant)
-- Open Settings in the app and set:
-  - Base URL (e.g., Gemini: `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent`)
-  - API Key (Provider key when required)
-  - Model ID (for OpenAI/OpenRouter, defaults to `gpt-4o-mini` or `openai/gpt-4o-mini`)
-- Notes:
-  - Gemini endpoints require the key in the query string; the app handles this format
-  - OpenAI/OpenRouter use `Authorization: Bearer <key>`
-  - Local endpoints are supported via `inputs` payload and do not require a key
+### 🤖 AI Health Assistant
+- **Context-Aware Chat**: A built-in chatbot that knows your medication list. Ask "What are the side effects of my morning pill?" and it understands which pill you mean.
+- **Multi-Provider Support**: Configure your preferred AI backend:
+  - **Google Gemini** (Recommended/Free)
+  - **OpenAI** (GPT-3.5/4)
+  - **OpenRouter**
+  - **Local LLMs** (via local endpoints)
+- **Privacy-First**: AI keys are stored locally; personal health data is anonymized where possible during queries.
 
-## Usage
-- Add Medicine
-  - Enter name, strength, dose amount, schedule (times or intervals or weekdays), instructions, dates, refills, initial supply, doses/day; optionally add a photo
-- Reminders
-  - Receive high‑priority notifications at exact times; mark Taken or Snooze; missed doses are detected after a grace period
-- History
-  - View timeline of events and a calendar heat‑map of adherence; filter by day/week/month
-- Supply
-  - Remaining supply decrements on Taken; add refills; see days‑left and run‑out date
-- Doctor Pack PDF
-  - Generate a consolidated regimen + 30‑day adherence PDF; open in external viewer when available or in the built‑in viewer; share via standard intents
-- Chat
-  - Ask questions: medicine‑specific queries show local summaries; general Q&A uses configured AI endpoint with cleaned, readable responses
+### 📄 Doctor Pack
+- **One-Tap Reporting**: Generates a professional PDF report summarizing current medications, recent adherence history, and missed dose frequency.
+- **Easy Sharing**: Share the PDF directly with healthcare providers via email, WhatsApp, or print it.
+- **Built-in Viewer**: Preview reports within the app without needing external PDF readers.
 
-## Testing
-- Unit: `./gradlew test`
-- Instrumentation/UI: `./gradlew connectedAndroidTest` (requires a running emulator/device)
-- Manual Scenarios
-  - Create multiple medicines with different schedules; verify notifications at the exact minute
-  - Mark Taken and Snooze; confirm history entries and supply changes
-  - Ignore a reminder to confirm missed‑dose logging and optional catch‑up
-  - Generate Doctor Pack with long content; verify pagination, open and share behavior without external viewer
-  - Configure AI settings; validate chat responses and fallback behavior when offline
+### 🛡️ Safety & Caretakers
+- **Caretaker Management**: Store contact details for family members or caregivers.
+- **Interaction Checking**: Basic checks for potential drug-drug interactions (`InteractionChecker`).
+- **Side Effects Log**: Record and monitor adverse reactions (`SideEffectsActivity`).
 
-## Troubleshooting
-- Notifications not arriving exactly on time (Android 12+)
-  - Ensure Exact Alarm permission is enabled in system settings for the app
-- “No PDF viewer installed”
-  - Use the built‑in viewer; share still works via a public Downloads URI or FileProvider
-- Share errors
-  - On Android 10+, the app copies the PDF to `Downloads/SmartDosage` via MediaStore; recipients should open without additional permissions
-- AI failures
-  - Verify Base URL, API key, and model ID; the app falls back to local answers when endpoints fail
+---
 
-## Privacy & Security
-- All medical data is stored locally using Room; no automatic cloud sync
-- PDF sharing uses scoped URIs (MediaStore/FileProvider) with read grants
-- AI keys are stored in app preferences; keys are not committed to source control
+## 🛠️ Tech Stack & Architecture
 
-## Roadmap
-- Enhanced PDF styling (tables, headers, branding)
-- Rich adherence analytics (streaks, trends, notification engagement)
-- Backup/restore and optional secure cloud sync
-- Localization and accessibility improvements
+### **Core Android**
+- **Language**: Java 11
+- **SDK Levels**:
+  - `minSdk`: 24 (Android 7.0 Nougat)
+  - `compileSdk` / `targetSdk`: 36 (Android 15)
+- **Build System**: Gradle with Kotlin DSL (`build.gradle.kts`) and Version Catalogs.
 
-## License
-- Copyright © 2025. All rights reserved.
+### **Libraries & Dependencies**
+- **UI/UX**:
+  - Material Components (MDC) for modern design implementation.
+  - `ConstraintLayout` & `GridLayout` for responsive layouts.
+  - `RecyclerView` with custom Adapters for lists.
+- **Data Persistence**:
+  - **Room Database**: Robust SQLite abstraction for local offline-first data storage.
+  - **DAOs**: Type-safe database queries.
+- **Background Processing**:
+  - `WorkManager`: For deferrable background tasks.
+  - `AlarmManager`: For precise time-based scheduling.
+  - `BroadcastReceiver`: For handling system events (Boot, Notifications).
+- **Machine Learning**:
+  - **Google ML Kit (Text Recognition)**: On-device OCR for reading prescriptions.
+- **Networking & Image Loading**:
+  - `HttpURLConnection`: Lightweight raw networking for AI API calls.
+  - **Glide**: Efficient image loading and caching for medicine photos.
+- **Utilities**:
+  - `Gson` / `org.json`: JSON parsing for AI responses.
+  - `PDFDocument`: Native Android PDF generation.
 
+### **Architecture Pattern**
+The app follows a modular architecture inspired by **MVVM** principles:
+- **Data Layer**: Room Database (`AppDatabase`), Entities (`Medicine`, `DoseEvent`), and DAOs handle all data operations.
+- **Domain/Business Logic**: Specialized Managers and Receivers (`SupplyManager`, `ReminderScheduler`, `NotificationHelper`) encapsulate core logic.
+- **UI Layer**: Activities act as controllers, observing data (often via direct database queries on background threads for simplicity in this iteration) and updating the UI.
+
+---
+
+## 🚀 Scalability & Future Roadmap
+
+The current architecture is designed to be extensible. Planned future improvements include:
+
+1.  **Cloud Synchronization**:
+    - Migration from local-only Room database to a synchronized solution (e.g., Firebase or Supabase) to allow multi-device usage and cloud backup.
+2.  **Wear OS Companion App**:
+    - Quick actions (Take/Snooze) directly from a smartwatch.
+3.  **Advanced Telemedicine Integration**:
+    - Direct appointment booking.
+    - Real-time dashboard for doctors to view patient adherence.
+4.  **Enhanced AI Analytics**:
+    - Predictive insights (e.g., "You tend to miss doses on weekends") using on-device TensorFlow Lite models.
+5.  **Drug Interaction API**:
+    - Integration with professional medical APIs (like RxNorm) for comprehensive interaction checking.
+6.  **Localization (i18n)**:
+    - Support for multiple languages to serve a global user base.
+
+---
+
+## 🔒 Privacy & Security
+
+- **Local First**: All sensitive medical data is stored strictly on the user's device in the Room database. It is **not** uploaded to any external server by default.
+- **AI Privacy**: When using the AI chat, only the user's query is sent. Users can choose to use local LLMs for 100% offline privacy.
+- **Scoped Storage**: The app respects Android's scoped storage rules, ensuring it only accesses files it created or was granted permission to see.
+
+---
+
+## ⚙️ Setup & Configuration
+
+### Prerequisites
+- **Android Studio**: Ladybug or newer (recommended).
+- **JDK**: Java 11 or higher.
+- **Android Device/Emulator**: Running Android 7.0 (API 24) or higher.
+
+### Installation
+1.  **Clone the Repository**:
+    ```bash
+    git clone https://github.com/your-username/smart-dosage.git
+    ```
+2.  **Open in Android Studio**: Allow Gradle to sync dependencies.
+3.  **Build**:
+    ```bash
+    ./gradlew assembleDebug
+    ```
+
+### Configuring AI (Optional)
+To use the Chat Assistant:
+1.  Go to **Settings** > **AI Configuration**.
+2.  **Base URL**:
+    - Gemini: `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent`
+    - OpenAI: `https://api.openai.com/v1/chat/completions`
+3.  **API Key**: Enter your provider's API key.
+
+---
+
+## © License
+Copyright © 2025 Smart Dosage Team. All rights reserved.

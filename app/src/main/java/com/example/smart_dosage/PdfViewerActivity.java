@@ -18,7 +18,6 @@ public class PdfViewerActivity extends AppCompatActivity {
     private ParcelFileDescriptor pfd;
     private ImageView image;
     private int index = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

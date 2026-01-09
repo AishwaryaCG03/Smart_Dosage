@@ -13,7 +13,6 @@ public class AuthActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
-
         TextInputEditText etEmail = findViewById(R.id.et_email);
         TextInputEditText etPassword = findViewById(R.id.et_password);
 

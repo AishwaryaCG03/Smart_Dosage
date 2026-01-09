@@ -18,7 +18,6 @@ public class BudgetActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget);
-
         android.widget.EditText name = findViewById(R.id.et_item_name);
         android.widget.EditText cost = findViewById(R.id.et_item_cost);
         android.widget.TextView total = findViewById(R.id.tv_total);

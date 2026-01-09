@@ -42,7 +42,6 @@ public class MedicineAdapter extends RecyclerView.Adapter<MedicineAdapter.VH> {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_medicine, parent, false);
         return new VH(v);
     }
-
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         Medicine m = items.get(position);

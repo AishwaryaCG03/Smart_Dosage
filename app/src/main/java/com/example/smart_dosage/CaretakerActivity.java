@@ -18,7 +18,6 @@ import java.util.List;
 public class CaretakerActivity extends AppCompatActivity {
     private List<Caretaker> caretakers = new ArrayList<>();
     private CaretakerAdapter adapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

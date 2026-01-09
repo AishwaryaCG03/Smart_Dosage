@@ -213,5 +213,4 @@ public class MainActivity extends AppCompatActivity {
                 .setNeutralButton("Close", null)
                 .show();
     }
-    
 }

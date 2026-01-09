@@ -81,7 +81,6 @@ public class AddMedicineActivity extends AppCompatActivity {
                 }, c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH)).show();
             });
         }
-
         findViewById(R.id.btn_photo).setOnClickListener(v -> {
             Intent pick = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(pick, REQ_PHOTO);

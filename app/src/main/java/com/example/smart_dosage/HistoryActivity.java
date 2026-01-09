@@ -58,6 +58,8 @@ public class HistoryActivity extends AppCompatActivity {
         findViewById(R.id.btn_week).setOnClickListener(v -> loadStats(tvMetrics, tvStreak));
         findViewById(R.id.btn_month).setOnClickListener(v -> loadStats(tvMetrics, tvStreak));
 
+        
+
         View prev = findViewById(R.id.btn_prev_month);
         View next = findViewById(R.id.btn_next_month);
         TextView tvTitle = findViewById(R.id.tv_month_title);
@@ -77,7 +79,6 @@ public class HistoryActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", null)
                 .show();
     }
-
     private void markDayStatus(java.util.Date day, String action){
         new Thread(() -> {
             Calendar c = Calendar.getInstance(); c.setTime(day); c.set(Calendar.HOUR_OF_DAY, 12); c.set(Calendar.MINUTE, 0); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0);
@@ -112,7 +113,7 @@ public class HistoryActivity extends AppCompatActivity {
 
             int takenWeek = AppDatabase.get(this).doseEventDao().countTaken(weekStart, today);
             int scheduledWeek = AppDatabase.get(this).doseEventDao().countScheduled(weekStart, today);
-            int weekPct = scheduledWeek == 0 ? 0 : (int) Math.round((takenWeek * 100.0) / scheduledWeek);
+            int weekPctDose = scheduledWeek == 0 ? 0 : (int) Math.round((takenWeek * 100.0) / scheduledWeek);
 
             int takenMonth = AppDatabase.get(this).doseEventDao().countTaken(monthStart, monthEnd);
             int scheduledMonth = AppDatabase.get(this).doseEventDao().countScheduled(monthStart, monthEnd);
@@ -161,7 +162,17 @@ public class HistoryActivity extends AppCompatActivity {
             }
 
             List<DayCell> monthCells = buildMonthCells(dayStatsMonth, viewMonthCal);
-            final int finalWeekPct = weekPct;
+            // Compute week adherence based on green days in the last 7 days for better alignment with calendar status
+            int greenWeek = 0;
+            Calendar wk = Calendar.getInstance();
+            for (int i=0;i<7;i++){
+                String k = dayFmt.format(wk.getTime());
+                DayStats s = dayStatsAll.get(k);
+                if (computeStatus(s) == 3) greenWeek++;
+                wk.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            int weekPctDays = (int) Math.round((greenWeek * 100.0) / 7.0);
+            final int finalWeekPct = weekPctDays;
             final int finalMonthPct = monthPct;
             int totalGreen = 0;
             Calendar countCal = Calendar.getInstance();
@@ -173,7 +184,8 @@ public class HistoryActivity extends AppCompatActivity {
                 if (computeStatus(s) == 3) totalGreen++;
                 countCal.add(Calendar.DAY_OF_YEAR, -1);
             }
-            final int finalStreak = totalGreen;
+            int monthGreen = 0; for (DayCell dc : monthCells) { if (dc.day != null && dc.status == 3) monthGreen++; }
+            final int finalStreak = monthGreen;
             runOnUiThread(() -> {
                 com.google.android.material.progressindicator.LinearProgressIndicator lpi = findViewById(R.id.pb_week);
                 if (lpi != null) lpi.setProgress(finalWeekPct);

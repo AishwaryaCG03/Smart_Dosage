@@ -195,8 +195,10 @@ public class ChatActivity extends AppCompatActivity {
     private String readStream(java.io.InputStream is) throws java.io.IOException {
         java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
-        String line; int count = 0;
-        while ((line = br.readLine()) != null && count < 1000) { sb.append(line).append('\n'); count += line.length(); }
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line).append('\n');
+        }
         return sb.toString();
     }
 

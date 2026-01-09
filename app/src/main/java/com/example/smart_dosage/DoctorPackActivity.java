@@ -27,7 +27,6 @@ public class DoctorPackActivity extends AppCompatActivity {
         android.view.View btnOpen = findViewById(R.id.btn_open_pdf);
         android.view.View btnShare = findViewById(R.id.btn_share_pdf);
         android.widget.TextView tvStats = findViewById(R.id.tv_stats);
-
         updateLast(tvLast);
 
         try {
